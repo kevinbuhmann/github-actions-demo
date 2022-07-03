@@ -1,0 +1,30 @@
+name: deploy
+
+on:
+  push:
+    branches: main
+
+concurrency:
+  group: main
+  cancel-in-progress: true
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Ckeckout code
+        uses: actions/checkout@v2
+
+      - name: Install Dependencies
+        run: npm ci
+
+      - name: Build
+        run: npm run build
+
+      - name: Deploy
+        timeout-minutes: 5
+        env:
+          NETLIFY_SITE_ID: ${{secrets.NETLIFY_SITE_ID}}
+          NETLIFY_AUTH_TOKEN: ${{secrets.NETLIFY_AUTH_TOKEN}}
+        run: npx netlify-cli deploy --prod

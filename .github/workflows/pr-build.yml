@@ -1,0 +1,36 @@
+name: PR Build
+
+on:
+  pull_request:
+
+concurrency:
+  group: pr-build-${{github.event.pull_request.number}}
+  cancel-in-progress: true
+
+jobs:
+  build:
+    name: PR Build
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v2
+        with:
+          with-version: 16
+
+      - name: Install Dependencies
+        run: npm ci
+
+      - name: Build
+        run: npm run build
+
+      - name: Test
+        run: npm run test -- --watch=false
+
+      - name: Upload Artifact
+        uses: actions/upload-artifact@v3
+        with:
+          name: dist
+          path: ./dist
